@@ -61,9 +61,7 @@ define(['zepto'], function ($) {
 
     ImportAsJSONAction.prototype.importObjectTree = function (objTree) {
         var parent = this.context.domainObject;
-        var namespace = parent.useCapability('adapter').identifier.namespace;
-
-        var tree = this.generateNewIdentifiers(objTree, namespace);
+        var tree = this.generateNewIdentifiers(objTree);
         var rootId = tree.rootId;
         var rootObj = this.instantiate(tree.openmct[rootId], rootId);
         var newStyleParent = parent.useCapability('adapter');
@@ -107,6 +105,7 @@ define(['zepto'], function ($) {
                 if (!tree[keystring] || seen.includes(keystring)) {
                     return;
                 }
+
                 newObj = this.instantiate(tree[keystring], keystring);
                 newObj.getCapability("location")
                     .setPrimaryLocation(tree[keystring].location);
@@ -115,13 +114,10 @@ define(['zepto'], function ($) {
         }
     };
 
-    ImportAsJSONAction.prototype.generateNewIdentifiers = function (tree, namespace) {
+    ImportAsJSONAction.prototype.generateNewIdentifiers = function (tree) {
         // For each domain object in the file, generate new ID, replace in tree
         Object.keys(tree.openmct).forEach(function (domainObjectId) {
-            var newId = this.openmct.objects.makeKeyString({
-                namespace: namespace,
-                key: this.identifierService.generate()
-            });
+            var newId = this.identifierService.generate();
             tree = this.rewriteId(domainObjectId, newId, tree);
         }, this);
         return tree;
